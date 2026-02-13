@@ -1,0 +1,14 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "attendance_selfies": {
+      "$userId": {
+        "$attendanceId": {
+          ".read": "auth != null && (auth.uid == $userId || root.child('users').child(auth.uid).child('role').val() == 'admin')",
+          ".write": "auth != null && auth.uid == $userId"
+        }
+      }
+    }
+  }
+}
