@@ -1,6 +1,7 @@
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/student_repository.dart';
 import '../datasources/student_datasource.dart';
+import '../models/user_model.dart';
 
 class StudentRepositoryImpl implements StudentRepository {
   final StudentDataSource _dataSource;
@@ -14,12 +15,24 @@ class StudentRepositoryImpl implements StudentRepository {
 
   @override
   Future<void> addStudent(UserEntity student, String password) {
-    return _dataSource.addStudent(student as dynamic, password);
+    final userModel = UserModel(
+      id: student.id,
+      name: student.name,
+      email: student.email,
+      role: student.role,
+    );
+    return _dataSource.addStudent(userModel, password);
   }
 
   @override
   Future<void> updateStudent(UserEntity student) {
-    return _dataSource.updateStudent(student as dynamic);
+    final userModel = UserModel(
+      id: student.id,
+      name: student.name,
+      email: student.email,
+      role: student.role,
+    );
+    return _dataSource.updateStudent(userModel);
   }
 
   @override

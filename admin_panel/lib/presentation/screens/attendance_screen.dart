@@ -37,19 +37,27 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Attendance Records',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                Expanded(
+                  flex: 2,
+                  child: const Text(
+                    'Attendance Records',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                ElevatedButton.icon(
-                  onPressed: attendanceAsync.hasValue && attendanceAsync.value!.isNotEmpty
-                      ? () => _exportToCSV(attendanceAsync.value!)
-                      : null,
-                  icon: const Icon(Icons.download),
-                  label: const Text('Export CSV'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
+                const SizedBox(width: 16),
+                Flexible(
+                  child: ElevatedButton.icon(
+                    onPressed: attendanceAsync.hasValue && attendanceAsync.value!.isNotEmpty
+                        ? () => _exportToCSV(attendanceAsync.value!)
+                        : null,
+                    icon: const Icon(Icons.download, size: 16),
+                    label: const Text('Export CSV', style: TextStyle(fontSize: 12)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
                   ),
                 ),
               ],

@@ -1,0 +1,96 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is admin (with fallback)
+    function isAdmin() {
+      return isAuthenticated() && (
+        // Check if admin role is in token claims (set by custom claims)
+        request.auth.token.admin == true ||
+        // Fallback: check specific admin emails (replace with your admin emails)
+        request.auth.token.email in ['admin@attendance.com', 'administrator@gmail.com', 'arya@admin.com'] ||
+        // Fallback: check user document if it exists
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+    
+    // Users collection - Allow users to read their own data for role checking
+    match /users/{userId} {
+      // Users can read their own data - direct check without isAdmin() to avoid circular dependency
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Admins can read any user's data (avoid circular check for admin reading others)
+      allow read: if isAuthenticated() && (
+        request.auth.token.admin == true ||
+        request.auth.token.email in ['admin@attendance.com', 'administrator@gmail.com', 'arya@admin.com']
+      );
+      
+      // User creation rules
+      allow create: if (
+        // Self registration (for admin setup)
+        (isAuthenticated() && request.auth.uid == userId) ||
+        // Admin creating other users
+        isAdmin()
+      );
+      
+      // Only authenticated admins can update or delete users  
+      allow update, delete: if isAdmin();
+    }
+    
+    // Institute settings collection
+    match /institute/{document=**} {
+      // Anyone authenticated can read institute settings
+      allow read: if isAuthenticated();
+      
+      // Only admins can update institute settings
+      allow write: if isAdmin();
+    }
+    
+    // Attendance collection
+    match /attendance/{attendanceId} {
+      // Admins can read all attendance
+      allow read: if isAuthenticated() && (
+        isAdmin() ||
+        // Students can only read their own attendance
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'student' &&
+         resource.data.studentId == request.auth.uid)
+      );
+      
+      // Students can create attendance only for themselves
+      allow create: if isAuthenticated() && (
+        isAdmin() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'student' &&
+         request.resource.data.studentId == request.auth.uid &&
+         request.resource.data.createdAt == request.time)
+      );
+      
+      // Students can update their own attendance (for check-out)
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'student' &&
+         resource.data.studentId == request.auth.uid &&
+         request.resource.data.studentId == resource.data.studentId &&
+         request.resource.data.date == resource.data.date &&
+         request.resource.data.checkInTime == resource.data.checkInTime)
+      );
+      
+      // Only admins can delete attendance
+      allow delete: if isAdmin();
+    }
+    
+    // Allow admins to read/write any document (emergency access)
+    match /{document=**} {
+      allow read, write: if isAuthenticated() && 
+      request.auth.token.admin == true;
+    }
+  }
+}

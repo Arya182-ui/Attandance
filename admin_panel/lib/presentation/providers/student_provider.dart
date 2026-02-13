@@ -15,15 +15,32 @@ class StudentNotifier extends StateNotifier<AsyncValue<void>> {
   Future<void> addStudent(String name, String email, String password) async {
     state = const AsyncValue.loading();
     try {
+      print('Provider: Starting to add student - $name, $email');
+      
+      // Validate inputs
+      if (name.trim().isEmpty) {
+        throw Exception('Student name cannot be empty');
+      }
+      if (email.trim().isEmpty || !email.contains('@')) {
+        throw Exception('Please provide a valid email address');
+      }
+      if (password.length < 6) {
+        throw Exception('Password must be at least 6 characters long');
+      }
+
       final student = UserEntity(
         id: '',
-        name: name,
-        email: email,
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
         role: 'student',
       );
+      
       await _ref.read(studentRepositoryProvider).addStudent(student, password);
       state = const AsyncValue.data(null);
+      print('Provider: Student added successfully');
+      
     } catch (e, stack) {
+      print('Provider Error: $e');
       state = AsyncValue.error(e, stack);
       rethrow;
     }
