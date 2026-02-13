@@ -16,19 +16,50 @@ class StudentsScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Students Management',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                Expanded(
+                  child: Text(
+                    'Students Management',
+                    style: TextStyle(
+                      fontSize: MediaQuery.of(context).size.width > 600 ? 28 : 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                ElevatedButton.icon(
-                  onPressed: () => _showAddStudentDialog(context, ref),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Student'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    foregroundColor: Colors.white,
+                const SizedBox(width: 8),
+                // Refresh Button
+                IconButton(
+                  onPressed: () {
+                    ref.invalidate(studentsProvider);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Students list refreshed!'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.refresh),
+                  tooltip: 'Refresh Students List',
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.grey.shade100,
+                    foregroundColor: Colors.deepPurple,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _showAddStudentDialog(context, ref),
+                    icon: const Icon(Icons.add, size: 16),
+                    label: Text(
+                      MediaQuery.of(context).size.width > 400 ? 'Add Student' : 'Add',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
                   ),
                 ),
               ],
@@ -172,23 +203,49 @@ class StudentsScreen extends ConsumerWidget {
             onPressed: () async {
               if (formKey.currentState!.validate()) {
                 try {
+                  print('Screen: Starting to add student');
+                  
+                  // Show loading indicator
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+
                   await ref.read(studentNotifierProvider.notifier).addStudent(
-                    nameController.text,
-                    emailController.text,
+                    nameController.text.trim(),
+                    emailController.text.trim(),
                     passwordController.text,
                   );
+                  
                   if (context.mounted) {
-                    Navigator.pop(context);
+                    Navigator.pop(context); // Close loading dialog
+                    Navigator.pop(context); // Close add dialog
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Student added successfully')),
+                      const SnackBar(
+                        content: Text('Student added successfully!'),
+                        backgroundColor: Colors.green,
+                      ),
                     );
                   }
                 } catch (e) {
                   if (context.mounted) {
+                    Navigator.pop(context); // Close loading dialog if open
+                    String errorMessage = e.toString();
+                    if (errorMessage.startsWith('Exception: ')) {
+                      errorMessage = errorMessage.substring(11);
+                    }
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+                      SnackBar(
+                        content: Text(errorMessage),
+                        backgroundColor: Colors.red,
+                        duration: const Duration(seconds: 4),
+                      ),
                     );
                   }
+                  print('Screen Error: $e');
                 }
               }
             },
