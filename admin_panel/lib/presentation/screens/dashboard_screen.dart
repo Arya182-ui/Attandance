@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../domain/entities/user_entity.dart';
 import '../providers/admin_auth_provider.dart';
 import 'students_screen.dart';
 import 'institute_settings_screen.dart';
@@ -33,7 +34,7 @@ class DashboardScreen extends ConsumerWidget {
 }
 
 class _DashboardContent extends ConsumerStatefulWidget {
-  final user;
+  final UserEntity user;
 
   const _DashboardContent({required this.user});
 

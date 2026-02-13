@@ -11,14 +11,8 @@ void main() async {
   // Initialize Firebase
   // Note: You need to configure Firebase for your project
   // Run: flutterfire configure
-  await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: 'YOUR_API_KEY',
-      appId: 'YOUR_APP_ID',
-      messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-      projectId: 'YOUR_PROJECT_ID',
-    ),
-  );
+  // This will generate firebase_options.dart with your project configuration
+  await Firebase.initializeApp();
 
   runApp(
     const ProviderScope(

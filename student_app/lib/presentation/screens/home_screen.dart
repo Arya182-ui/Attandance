@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../providers/attendance_provider.dart';
 import 'attendance_history_screen.dart';
@@ -33,7 +34,7 @@ class HomeScreen extends ConsumerWidget {
 }
 
 class _HomeContent extends ConsumerWidget {
-  final user;
+  final UserEntity user;
 
   const _HomeContent({required this.user});
 
