@@ -2,10 +2,63 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // TEMPORARY: Allow all authenticated users to read/write for debugging
-    // Remove this after testing!
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'super_admin'];
+    }
+    
+    function isStudent() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'student';
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Users can read their own profile, admins can read all
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Only admins can create/update/delete users
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Attendance collection
+    match /attendance/{attendanceId} {
+      // Students can read their own attendance, admins can read all
+      allow read: if isAdmin() || 
+                     (isStudent() && resource.data.studentId == request.auth.uid);
+      
+      // Students can create/update their own attendance (check-in/out)
+      // Admins can create/update/delete any attendance
+      allow create: if isAdmin() || 
+                       (isStudent() && request.resource.data.studentId == request.auth.uid);
+      
+      allow update: if isAdmin() || 
+                       (isStudent() && resource.data.studentId == request.auth.uid);
+      
+      allow delete: if isAdmin();
+    }
+    
+    // Institute settings
+    match /institute/{document=**} {
+      // Everyone authenticated can read institute settings (needed for geofencing)
+      allow read: if isAuthenticated();
+      
+      // Only admins can write institute settings
+      allow write: if isAdmin();
+    }
+    
+    // Deny all other access
     match /{document=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if false;
     }
   }
 }

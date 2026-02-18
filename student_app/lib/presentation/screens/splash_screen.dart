@@ -80,9 +80,9 @@ class _SplashScreenState extends State<SplashScreen>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF1A237E), // Deep Blue
-              Color(0xFF3F51B5), // Indigo
-              Color(0xFF7986CB), // Light Indigo
+              Color(0xFF0D9488), // Teal
+              Color(0xFF0891B2), // Cyan
+              Color(0xFF67E8F9), // Light Cyan
             ],
           ),
         ),
@@ -103,7 +103,7 @@ class _SplashScreenState extends State<SplashScreen>
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -117,7 +117,7 @@ class _SplashScreenState extends State<SplashScreen>
                         return const Icon(
                           Icons.school,
                           size: 80,
-                          color: Color(0xFF1A237E),
+                          color: Color(0xFF0D9488),
                         );
                       },
                     ),
@@ -127,7 +127,7 @@ class _SplashScreenState extends State<SplashScreen>
 
                 // App name
                 const Text(
-                  'Student Attendance',
+                  'SmartCareerAdvisor',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -139,10 +139,10 @@ class _SplashScreenState extends State<SplashScreen>
 
                 // Subtitle
                 Text(
-                  'Geo-Fenced Attendance System',
+                  'Attendance Management System',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     letterSpacing: 0.5,
                   ),
                 ),

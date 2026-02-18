@@ -31,6 +31,9 @@ dependencies:
   
   # Image
   image_picker: ^1.0.4
+  
+  # Network
+  connectivity_plus: ^5.0.2
 
 dev_dependencies:
   flutter_test:
@@ -47,8 +50,11 @@ flutter:
 
 # App Icon Configuration
 flutter_launcher_icons:
-  android: "launcher_icon"
-  ios: true
+  android: "ic_launcher"
+  ios: false
+  web:
+    generate: true
+    image_path: "assets/images/logo.png"
   image_path: "assets/images/logo.png"
   adaptive_icon_background: "#ffffff"
   adaptive_icon_foreground: "assets/images/logo.png"

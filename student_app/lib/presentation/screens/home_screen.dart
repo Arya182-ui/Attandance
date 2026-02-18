@@ -5,6 +5,7 @@ import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../providers/attendance_provider.dart';
 import 'attendance_history_screen.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -44,7 +45,7 @@ class _HomeContent extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Student Attendance'),
+        title: const Text('SmartCareerAdvisor'),
         actions: [
           IconButton(
             icon: const Icon(Icons.history),
@@ -77,9 +78,17 @@ class _HomeContent extends ConsumerWidget {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      const CircleAvatar(
+                      CircleAvatar(
                         radius: 40,
-                        child: Icon(Icons.person, size: 40),
+                        backgroundImage: user.profileImageUrl != null
+                            ? NetworkImage(user.profileImageUrl!)
+                            : null,
+                        child: user.profileImageUrl == null
+                            ? Text(
+                                user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
+                                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                              )
+                            : null,
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -97,6 +106,27 @@ class _HomeContent extends ConsumerWidget {
                           color: Colors.grey,
                         ),
                       ),
+                      if (user.enrollmentNumber != null || user.course != null || user.batch != null) ...[
+                        const Divider(height: 20),
+                        if (user.enrollmentNumber != null)
+                          _ProfileInfoRow(
+                            icon: Icons.badge_outlined,
+                            label: 'Enrollment',
+                            value: user.enrollmentNumber!,
+                          ),
+                        if (user.course != null)
+                          _ProfileInfoRow(
+                            icon: Icons.school_outlined,
+                            label: 'Course',
+                            value: user.course!,
+                          ),
+                        if (user.batch != null)
+                          _ProfileInfoRow(
+                            icon: Icons.group_outlined,
+                            label: 'Batch',
+                            value: user.batch!,
+                          ),
+                      ],
                     ],
                   ),
                 ),
@@ -275,6 +305,18 @@ class _CheckInButton extends ConsumerWidget {
         onPressed: attendanceState.isLoading
             ? null
             : () async {
+                final connectivityResult = await Connectivity().checkConnectivity();
+                if (connectivityResult == ConnectivityResult.none) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('No internet connection. Please check your network.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                  return;
+                }
                 try {
                   await ref.read(attendanceNotifierProvider.notifier).checkIn(studentId);
                   if (context.mounted) {
@@ -340,6 +382,18 @@ class _CheckOutButton extends ConsumerWidget {
         onPressed: attendanceState.isLoading
             ? null
             : () async {
+                final connectivityResult = await Connectivity().checkConnectivity();
+                if (connectivityResult == ConnectivityResult.none) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('No internet connection. Please check your network.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                  return;
+                }
                 try {
                   await ref.read(attendanceNotifierProvider.notifier).checkOut(studentId);
                   if (context.mounted) {
@@ -384,6 +438,49 @@ class _CheckOutButton extends ConsumerWidget {
                   ),
                 ],
               ),
+      ),
+    );
+  }
+}
+
+class _ProfileInfoRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _ProfileInfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: const Color(0xFF0D9488)),
+          const SizedBox(width: 8),
+          Text(
+            '$label:',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.end,
+            ),
+          ),
+        ],
       ),
     );
   }
