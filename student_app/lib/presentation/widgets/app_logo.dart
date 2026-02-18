@@ -25,7 +25,7 @@ class AppLogo extends StatelessWidget {
           width: width ?? 80,
           height: height ?? 80,
           decoration: BoxDecoration(
-            color: Colors.blue,
+            color: const Color(0xFF0D9488),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
@@ -47,7 +47,7 @@ class AppLogo extends StatelessWidget {
 ///     children: [
 ///       AppLogo(width: 32, height: 32),
 ///       SizedBox(width: 8),
-///       Text('Student Attendance'),
+///       Text('SmartCareerAdvisor'),
 ///     ],
 ///   ),
 /// )

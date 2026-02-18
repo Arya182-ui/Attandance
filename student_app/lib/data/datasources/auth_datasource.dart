@@ -19,41 +19,114 @@ class AuthDataSource {
         throw Exception('Login failed. Please try again.');
       }
 
-      print('DEBUG signIn: User authenticated with UID: ${credential.user!.uid}');
+      // Try to get user data from Firestore, but don't fail if unavailable
+      String role = 'student';
+      String name = credential.user!.displayName ?? credential.user!.email?.split('@')[0] ?? 'Student';
+      String? instituteId;
+      String? enrollmentNumber;
+      String? course;
+      String? batch;
+      String? phone;
+      String? address;
+      String? profileImageUrl;
       
-      // Just return a placeholder - don't read from Firestore yet
-      // This avoids permission issues during login
+      try {
+        final userDoc = await _firestore
+            .collection('users')
+            .doc(credential.user!.uid)
+            .get()
+            .timeout(const Duration(seconds: 10));
+            
+        if (userDoc.exists) {
+          final data = userDoc.data();
+          if (data != null) {
+            role = data['role'] ?? 'student';
+            name = data['name'] ?? name;
+            instituteId = data['instituteId'];
+            enrollmentNumber = data['enrollmentNumber'];
+            course = data['course'];
+            batch = data['batch'];
+            phone = data['phone'];
+            address = data['address'];
+            profileImageUrl = data['profileImageUrl'];
+          }
+        }
+      } catch (e) {
+        // Firestore read failed, use defaults
+        print('Warning: Could not fetch user data from Firestore: $e');
+      }
+
       return UserModel(
         id: credential.user!.uid,
         email: credential.user!.email ?? email,
-        name: credential.user!.displayName ?? email.split('@')[0],
-        role: 'student',
+        name: name,
+        role: role,
+        instituteId: instituteId,
+        enrollmentNumber: enrollmentNumber,
+        course: course,
+        batch: batch,
+        phone: phone,
+        address: address,
+        profileImageUrl: profileImageUrl,
       );
       
     } on FirebaseAuthException catch (e) {
-      print('DEBUG signIn: FirebaseAuthException - ${e.code}');
-      
       switch (e.code) {
         case 'user-not-found':
-          throw Exception('No account found with this email address.');
+          throw Exception(
+            '❌ Account Not Found\n\n'
+            'No student account exists with this email address.\n\n'
+            'Please check your email or contact your administrator.'
+          );
         case 'wrong-password':
-          throw Exception('Incorrect password. Please try again.');
+          throw Exception(
+            '🔒 Incorrect Password\n\n'
+            'The password you entered is incorrect.\n\n'
+            'Please try again or reset your password.'
+          );
         case 'invalid-email':
-          throw Exception('Invalid email address format.');
+          throw Exception(
+            '📧 Invalid Email Format\n\n'
+            'Please enter a valid email address.'
+          );
         case 'user-disabled':
-          throw Exception('This account has been disabled.');
+          throw Exception(
+            '🚫 Account Disabled\n\n'
+            'Your student account has been disabled.\n\n'
+            'Please contact your administrator for assistance.'
+          );
         case 'too-many-requests':
-          throw Exception('Too many failed attempts. Please try again later.');
+          throw Exception(
+            '⏱️ Too Many Attempts\n\n'
+            'Too many failed login attempts.\n\n'
+            'Please wait a few minutes and try again.'
+          );
         case 'invalid-credential':
-          throw Exception('Invalid email or password. Please check and try again.');
+          throw Exception(
+            '❌ Invalid Credentials\n\n'
+            'The email or password is incorrect.\n\n'
+            'Please check your credentials and try again.'
+          );
         case 'network-request-failed':
-          throw Exception('Network error. Please check your internet connection.');
+          throw Exception(
+            '🌐 Network Error\n\n'
+            'Unable to connect to the server.\n\n'
+            'Please check your internet connection and try again.'
+          );
         default:
-          throw Exception('Login failed: ${e.message ?? 'Unknown error occurred'}');
+          throw Exception(
+            '⚠️ Login Failed\n\n'
+            '${e.message ?? "An unknown error occurred"}\n\n'
+            'Please try again or contact support if the problem persists.'
+          );
       }
     } catch (e) {
-      print('DEBUG signIn: Exception - $e');
-      throw Exception('Login failed. Please try again.');
+      if (e is Exception) rethrow;
+      throw Exception(
+        '⚠️ Login Error\n\n'
+        'An unexpected error occurred during login.\n\n'
+        'Please try again or contact support if the problem persists.'
+      );
     }
   }
 
@@ -65,35 +138,114 @@ class AuthDataSource {
     final currentUser = _auth.currentUser;
     if (currentUser == null) return null;
 
-    // Return placeholder without Firestore read for now
+    // Try to get user data from Firestore with proper error handling
+    String role = 'student';
+    String name = currentUser.displayName ?? currentUser.email?.split('@')[0] ?? 'Student';
+    String? instituteId;
+    String? enrollmentNumber;
+    String? course;
+    String? batch;
+    String? phone;
+    String? address;
+    String? profileImageUrl;
+    
+    try {
+      final userDoc = await _firestore
+          .collection('users')
+          .doc(currentUser.uid)
+          .get()
+          .timeout(const Duration(seconds: 10));
+          
+      if (userDoc.exists) {
+        final data = userDoc.data();
+        if (data != null) {
+          role = data['role'] ?? 'student';
+          name = data['name'] ?? name;
+          instituteId = data['instituteId'];
+          enrollmentNumber = data['enrollmentNumber'];
+          course = data['course'];
+          batch = data['batch'];
+          phone = data['phone'];
+          address = data['address'];
+          profileImageUrl = data['profileImageUrl'];
+        }
+      } else {
+        print('Warning: User document does not exist in Firestore for UID: ${currentUser.uid}');
+      }
+    } catch (e) {
+      // Use defaults
+      print('Warning: Could not fetch user data from Firestore: $e');
+    }
+
     return UserModel(
       id: currentUser.uid,
       email: currentUser.email ?? '',
-      name: currentUser.displayName ?? 'User',
-      role: 'student',
+      name: name,
+      role: role,
+      instituteId: instituteId,
+      enrollmentNumber: enrollmentNumber,
+      course: course,
+      batch: batch,
+      phone: phone,
+      address: address,
+      profileImageUrl: profileImageUrl,
     );
   }
 
   Stream<UserModel?> authStateChanges() {
     return _auth.authStateChanges().asyncMap((user) async {
-      print('DEBUG authStateChanges: user = ${user?.uid}');
-      
       if (user == null) {
-        print('DEBUG authStateChanges: user is null, returning null');
         return null;
       }
 
-      // Don't read Firestore here - just return a placeholder
-      // The signIn method will handle proper user loading
-      print('DEBUG authStateChanges: returning placeholder user');
+      // Try to fetch full user data from Firestore
+      String role = 'student';
+      String name = user.displayName ?? user.email?.split('@')[0] ?? 'Student';
+      String? instituteId;
+      String? enrollmentNumber;
+      String? course;
+      String? batch;
+      String? phone;
+      String? address;
+      String? profileImageUrl;
       
-      // Return a minimal UserModel with just the UID
-      // Full user data will be loaded by signIn
+      try {
+        final userDoc = await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .get()
+            .timeout(const Duration(seconds: 10));
+            
+        if (userDoc.exists) {
+          final data = userDoc.data();
+          if (data != null) {
+            role = data['role'] ?? 'student';
+            name = data['name'] ?? name;
+            instituteId = data['instituteId'];
+            enrollmentNumber = data['enrollmentNumber'];
+            course = data['course'];
+            batch = data['batch'];
+            phone = data['phone'];
+            address = data['address'];
+            profileImageUrl = data['profileImageUrl'];
+          }
+        }
+      } catch (e) {
+        print('Warning: Could not fetch user data in authStateChanges: $e');
+      }
+
       return UserModel(
         id: user.uid,
         email: user.email ?? '',
-        name: user.displayName ?? 'User',
-        role: 'student', // Assume student for now
+        name: name,
+        role: role,
+        instituteId: instituteId,
+        enrollmentNumber: enrollmentNumber,
+        course: course,
+        batch: batch,
+        phone: phone,
+        address: address,
+        profileImageUrl: profileImageUrl,
       );
     });
   }
