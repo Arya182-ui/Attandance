@@ -1,11 +1,9 @@
-import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
   Home, 
   Users, 
   ClipboardCheck, 
   Settings,
-  Menu,
   X,
   LogOut,
   GraduationCap
@@ -20,8 +18,12 @@ const navigation = [
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
-export default function Sidebar() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+interface SidebarProps {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}
+
+export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const { signOut } = useAuthStore();
   const location = useLocation();
 
@@ -35,91 +37,82 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile menu button */}
-      <div className="lg:hidden fixed top-3 left-3 z-50">
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="bg-white p-2.5 rounded-xl shadow-lg border border-gray-100"
-        >
-          {isMobileMenuOpen ? (
-            <X className="h-5 w-5 text-gray-600" />
-          ) : (
-            <Menu className="h-5 w-5 text-gray-600" />
-          )}
-        </button>
-      </div>
-
       {/* Mobile overlay */}
-      {isMobileMenuOpen && (
+      {isOpen && (
         <div 
-          className="lg:hidden fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
-          onClick={() => setIsMobileMenuOpen(false)}
+          className="lg:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+          onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <div className={cn(
-        "fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-100 transform transition-transform duration-300 ease-out",
-        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        "fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-100 flex flex-col transform transition-all duration-300 ease-in-out shadow-2xl lg:shadow-none",
+        isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
-        <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="flex items-center h-16 px-6 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-9 bg-linear-to-br from-teal-600 to-blue-700 rounded-xl flex items-center justify-center shadow-sm">
-                <GraduationCap className="h-5 w-5 text-white" />
+        <div className="flex flex-col h-full bg-white">
+          {/* Logo Section */}
+          <div className="flex items-center justify-between h-20 px-6 border-b border-gray-50/80">
+            <div className="flex items-center gap-3.5">
+              <div className="h-10 w-10 bg-linear-to-br from-teal-600 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-teal-100 ring-4 ring-teal-50">
+                <GraduationCap className="h-6 w-6 text-white" />
               </div>
-              <div>
-                <span className="text-sm font-bold text-gray-900">
+              <div className="flex flex-col">
+                <span className="text-base font-bold text-gray-900 tracking-tight leading-none">
                   SmartCareer
                 </span>
-                <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+                <span className="text-[10px] text-teal-600 font-bold uppercase tracking-widest mt-1">
                   Advisor Panel
-                </p>
+                </span>
               </div>
             </div>
+            {/* Close button for mobile */}
+            <button 
+              onClick={() => setIsOpen(false)}
+              className="lg:hidden p-2 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-gray-950 transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 px-3 py-4">
-            <div className="space-y-1">
-              {navigation.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.href;
-                
-                return (
-                  <NavLink
-                    key={item.name}
-                    to={item.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={cn(
-                      "group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200",
-                      isActive
-                        ? "bg-teal-50 text-teal-700"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                    )}
-                  >
-                    <Icon className={cn(
-                      "mr-3 h-4.5 w-4.5 transition-colors",
-                      isActive ? "text-teal-600" : "text-gray-400 group-hover:text-gray-600"
-                    )} />
-                    <span>{item.name}</span>
-                    {isActive && (
-                      <div className="ml-auto h-1.5 w-1.5 rounded-full bg-teal-500"></div>
-                    )}
-                  </NavLink>
-                );
-              })}
-            </div>
+          {/* Navigation Section */}
+          <nav className="flex-1 px-4 py-8 space-y-1.5 overflow-y-auto">
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              const isActive = location.pathname === item.href;
+              
+              return (
+                <NavLink
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => setIsOpen(false)}
+                  className={cn(
+                    "group flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200 relative",
+                    isActive
+                      ? "bg-teal-50/80 text-teal-700 shadow-sm shadow-teal-50"
+                      : "text-gray-500 hover:bg-gray-50/80 hover:text-gray-900"
+                  )}
+                >
+                  <Icon className={cn(
+                    "h-5 w-5 mr-3.5 transition-colors",
+                    isActive ? "text-teal-600" : "text-gray-400 group-hover:text-gray-600"
+                  )} />
+                  {item.name}
+                  {isActive && (
+                    <div className="absolute left-0 w-1 h-6 bg-teal-600 rounded-r-full" />
+                  )}
+                </NavLink>
+              );
+            })}
           </nav>
 
-          {/* Sign Out */}
-          <div className="p-3 border-t border-gray-100">
+          {/* Footer Section */}
+          <div className="p-4 border-t border-gray-50/80">
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all duration-200 group"
+              className="flex items-center w-full px-4 py-3.5 text-sm font-semibold text-red-500 rounded-xl hover:bg-red-50/80 transition-all duration-200 group"
             >
-              <LogOut className="mr-3 h-4.5 w-4.5 text-gray-400 group-hover:text-red-500 transition-colors" />
+              <LogOut className="h-5 w-5 mr-3.5 transition-transform group-hover:-translate-x-1" />
               Sign Out
             </button>
           </div>

@@ -36,6 +36,7 @@ class AttendanceService {
       }
 
       const snapshot = await getDocs(q);
+      
       let records = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
@@ -52,8 +53,27 @@ class AttendanceService {
       if (filters?.startDate || filters?.endDate) {
         records = records.filter(record => {
           const recordDate = record.date;
-          if (filters.startDate && recordDate < filters.startDate) return false;
-          if (filters.endDate && recordDate > filters.endDate) return false;
+          
+          // Use local date comparison (avoid timezone issues)
+          const recordYear = recordDate.getFullYear();
+          const recordMonth = recordDate.getMonth();
+          const recordDay = recordDate.getDate();
+          
+          const startYear = filters?.startDate?.getFullYear();
+          const startMonth = filters?.startDate?.getMonth();
+          const startDay = filters?.startDate?.getDate();
+          
+          const endYear = filters?.endDate?.getFullYear();
+          const endMonth = filters?.endDate?.getMonth();
+          const endDay = filters?.endDate?.getDate();
+          
+          // Create date objects for comparison (same timezone)
+          const recordDateOnly = new Date(recordYear, recordMonth, recordDay);
+          const startDateOnly = filters?.startDate ? new Date(startYear!, startMonth!, startDay!) : null;
+          const endDateOnly = filters?.endDate ? new Date(endYear!, endMonth!, endDay!) : null;
+          
+          if (startDateOnly && recordDateOnly < startDateOnly) return false;
+          if (endDateOnly && recordDateOnly >= endDateOnly) return false;
           return true;
         });
       }

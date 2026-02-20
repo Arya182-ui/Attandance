@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { X, Save, User, Eye, EyeOff, AlertCircle, Mail, Lock } from 'lucide-react';
 import type { Student } from '../types';
 import { studentService } from '../services/students';
+import { authService } from '../services/auth';
 
 // Simple schema - only name, email required. Password required for new students.
 const studentSchema = z.object({
@@ -97,19 +98,36 @@ export default function StudentModal({ isOpen, onClose, onSave, student }: Stude
 
         await studentService.updateStudent(student.id, updateData);
       } else {
-        // Create new student in Firestore
-        const studentData: any = {
-          name: data.name,
-          email: data.email,
-          role: 'student',
-          enrollmentNumber: data.enrollmentNumber || '',
-          course: data.course || '',
-          batch: data.batch || '',
-          phone: data.phone || '',
-          tempPassword: data.password, // Store temp password so student can login
-        };
+        // Create new student
+        if (!data.password) {
+          throw new Error('Password is required for new students');
+        }
 
-        await studentService.addStudent(studentData);
+        let uid = '';
+        try {
+          // Step 1: Create Firebase Auth user
+          uid = await authService.createUser({
+            email: data.email,
+            password: data.password
+          });
+
+          // Step 2: Create Firestore document with the Auth UID
+          const studentData: any = {
+            name: data.name,
+            email: data.email,
+            role: 'student',
+            enrollmentNumber: data.enrollmentNumber || '',
+            course: data.course || '',
+            batch: data.batch || '',
+            phone: data.phone || '',
+          };
+
+          await studentService.addStudent(studentData, uid);
+          
+        } catch (authError: any) {
+          console.error('Student creation failed:', authError);
+          throw new Error(`Failed to create student: ${authError.message}`);
+        }
       }
       
       onSave();

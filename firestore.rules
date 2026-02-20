@@ -12,11 +12,6 @@ service cloud.firestore {
              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'super_admin'];
     }
     
-    function isStudent() {
-      return isAuthenticated() && 
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'student';
-    }
-    
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
@@ -32,17 +27,23 @@ service cloud.firestore {
     
     // Attendance collection
     match /attendance/{attendanceId} {
-      // Students can read their own attendance, admins can read all
-      allow read: if isAdmin() || 
-                     (isStudent() && resource.data.studentId == request.auth.uid);
+      // Allow reading a specific doc if authenticated and the doc either
+      // doesn't exist yet (resource==null) or belongs to the student
+      allow get: if isAdmin() || 
+                    (isAuthenticated() && 
+                     (resource == null || resource.data.studentId == request.auth.uid));
       
-      // Students can create/update their own attendance (check-in/out)
-      // Admins can create/update/delete any attendance
+      // For queries (list), check that returned docs belong to the student
+      allow list: if isAdmin() || 
+                     (isAuthenticated() && resource.data.studentId == request.auth.uid);
+      
+      // Students can create their own attendance (check-in)
       allow create: if isAdmin() || 
-                       (isStudent() && request.resource.data.studentId == request.auth.uid);
+                       (isAuthenticated() && request.resource.data.studentId == request.auth.uid);
       
+      // Students can update their own attendance (check-out)
       allow update: if isAdmin() || 
-                       (isStudent() && resource.data.studentId == request.auth.uid);
+                       (isAuthenticated() && resource.data.studentId == request.auth.uid);
       
       allow delete: if isAdmin();
     }

@@ -1,0 +1,12 @@
+# SPA Redirects for deployment platforms
+# All routes should fallback to index.html for proper React Router handling
+
+/*    /index.html   200
+
+# API routes (if any) should be handled separately
+/api/*    /api/:splat   200
+
+# Static assets should be served directly
+/assets/*    /assets/:splat   200
+/images/*    /images/:splat   200
+/icons/*     /icons/:splat    200

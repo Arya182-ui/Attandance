@@ -27,10 +27,14 @@ class StudentService {
       );
 
       const snapshot = await getDocs(q);
-      let students = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Student[];
+      
+      let students = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data
+        };
+      }) as Student[];
 
       // Apply client-side filters
       if (filters?.search) {

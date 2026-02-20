@@ -1,10 +1,12 @@
 import { 
   signInWithEmailAndPassword, 
   signOut as firebaseSignOut,
-  onAuthStateChanged 
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signOut
 } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from './firebase';
+import { auth, secondaryAuth, db } from './firebase';
 import type { AuthUser, LoginCredentials } from '../types';
 
 class AuthService {
@@ -59,6 +61,24 @@ class AuthService {
     }
   }
   
+  // Create new user (for admins creating students)
+  // Uses secondary auth instance so admin session is untouched
+  async createUser({ email, password }: { email: string; password: string }): Promise<string> {
+    try {
+      // Create on secondary auth — admin stays logged in on primary auth
+      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+      const newUserUid = userCredential.user.uid;
+      
+      // Sign out from secondary auth (cleanup)
+      await signOut(secondaryAuth);
+      
+      return newUserUid;
+    } catch (error: any) {
+      console.error('Create user error:', error);
+      throw new Error(this.getAuthErrorMessage(error.code) || 'Failed to create user account');
+    }
+  }
+
   // Sign out
   async signOut(): Promise<void> {
     try {

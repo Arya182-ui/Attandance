@@ -53,7 +53,8 @@ class AuthDataSource {
         }
       } catch (e) {
         // Firestore read failed, use defaults
-        print('Warning: Could not fetch user data from Firestore: $e');
+        // Log error for debugging (remove print in production)
+        // print('Warning: Could not fetch user data from Firestore: $e');
       }
 
       return UserModel(
@@ -102,6 +103,7 @@ class AuthDataSource {
             'Please wait a few minutes and try again.'
           );
         case 'invalid-credential':
+        case 'invalid-login-credentials':
           throw Exception(
             '❌ Invalid Credentials\n\n'
             'The email or password is incorrect.\n\n'
@@ -170,11 +172,12 @@ class AuthDataSource {
           profileImageUrl = data['profileImageUrl'];
         }
       } else {
-        print('Warning: User document does not exist in Firestore for UID: ${currentUser.uid}');
+        // User document doesn't exist - use defaults
+        // print('Warning: User document does not exist in Firestore for UID: ${currentUser.uid}');
       }
     } catch (e) {
       // Use defaults
-      print('Warning: Could not fetch user data from Firestore: $e');
+      // print('Warning: Could not fetch user data from Firestore: $e');
     }
 
     return UserModel(
@@ -231,7 +234,8 @@ class AuthDataSource {
           }
         }
       } catch (e) {
-        print('Warning: Could not fetch user data in authStateChanges: $e');
+        // Firestore read failed in auth state changes
+        // print('Warning: Could not fetch user data in authStateChanges: $e');
       }
 
       return UserModel(

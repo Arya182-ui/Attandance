@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/loading_indicator.dart';
 
@@ -34,11 +36,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         _emailController.text.trim(),
         _passwordController.text,
       );
+      
+      // Don't show success toast here immediately
+      // Success will be shown when auth state actually changes
+      
     } catch (e) {
       if (mounted) {
         final errorMessage = e.toString().replaceAll('Exception: ', '');
         
-        // Show as dialog for better multiline error display
+        // Quick toast notification
+        Fluttertoast.showToast(
+          msg: "Login failed! Check your credentials",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 3,
+          backgroundColor: Colors.red[600],
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+        
+        // Show detailed error as dialog
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -71,6 +88,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Listen to auth state changes to show success message
+    ref.listen<AsyncValue<UserEntity?>>(authNotifierProvider, (previous, next) {
+      if (mounted && previous?.isLoading == true) {
+        // Only react if previous state was loading (i.e., we just attempted login)
+        if (next.hasValue && next.value != null) {
+          // Success - user is now logged in
+          Fluttertoast.showToast(
+            msg: "✅ Login successful! Welcome back",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Colors.green[600],
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }
+      }
+    });
+
     return Scaffold(
       body: SafeArea(
         child: Center(

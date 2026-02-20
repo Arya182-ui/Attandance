@@ -7,7 +7,8 @@ import {
   Search,
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  Hash
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { attendanceService } from '../services/attendance';
@@ -24,62 +25,64 @@ function AttendanceRecord({ attendance, student }: AttendanceRecordProps) {
   const statusColor = getStatusColor(attendance.status);
   
   return (
-    <div className="card p-4 hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          {/* Status Icon */}
-          <div className={`p-2 rounded-full ${statusColor}`}>
-            {attendance.status === 'checked_in' && <CheckCircle className="h-5 w-5" />}
-            {attendance.status === 'checked_out' && <CheckCircle className="h-5 w-5" />}
-            {attendance.status === 'absent' && <XCircle className="h-5 w-5" />}
+    <div className="bg-white rounded-4xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300 group">
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-4">
+          {/* Status Icon with animation */}
+          <div className={`p-3 rounded-2xl shadow-sm group-hover:scale-110 transition-transform duration-300 ${statusColor}`}>
+            {attendance.status === 'checked_in' && <CheckCircle className="h-6 w-6" />}
+            {attendance.status === 'checked_out' && <CheckCircle className="h-6 w-6" />}
+            {attendance.status === 'absent' && <XCircle className="h-6 w-6" />}
           </div>
           
           {/* Student Info */}
-          <div>
-            <h3 className="font-medium text-gray-900">
+          <div className="min-w-0">
+            <h3 className="text-lg font-black text-gray-900 truncate tracking-tight group-hover:text-teal-700 transition-colors">
               {student?.name || `Student ${attendance.studentId.substring(0, 8)}...`}
             </h3>
-            <p className="text-sm text-gray-600">
-              {student?.enrollmentNumber || attendance.studentId}
-            </p>
+            <div className="flex items-center text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">
+              <Hash className="h-3 w-3 mr-1" />
+              {student?.enrollmentNumber || attendance.studentId.substring(0, 8)}
+            </div>
           </div>
         </div>
 
-        {/* Status Badge */}
-        <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColor}`}>
+        {/* Status Badge - Ultra Modern */}
+        <div className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-tighter shadow-sm border ${statusColor} border-current/10`}>
           {formatStatus(attendance.status)}
         </div>
       </div>
 
-      {/* Attendance Details */}
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-        <div className="flex items-center text-gray-600">
-          <Calendar className="h-4 w-4 mr-2" />
-          {formatDate(attendance.date)}
+      {/* Modern Grid for Details */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="p-3 bg-gray-50 rounded-2xl flex items-center gap-3">
+          <Calendar className="h-4 w-4 text-gray-400" />
+          <span className="text-xs font-bold text-gray-600">{formatDate(attendance.date)}</span>
         </div>
         
         {attendance.checkInTime && (
-          <div className="flex items-center text-gray-600">
-            <Clock className="h-4 w-4 mr-2" />
-            In: {formatTime(attendance.checkInTime)}
+          <div className="p-3 bg-emerald-50/50 rounded-2xl flex items-center gap-3 border border-emerald-100/50">
+            <Clock className="h-4 w-4 text-emerald-500" />
+            <span className="text-xs font-bold text-emerald-700">In: {formatTime(attendance.checkInTime)}</span>
           </div>
         )}
         
         {attendance.checkOutTime && (
-          <div className="flex items-center text-gray-600">
-            <Clock className="h-4 w-4 mr-2" />
-            Out: {formatTime(attendance.checkOutTime)}
+          <div className="p-3 bg-blue-50/50 rounded-2xl flex items-center gap-3 border border-blue-100/50">
+            <Clock className="h-4 w-4 text-blue-500" />
+            <span className="text-xs font-bold text-blue-700">Out: {formatTime(attendance.checkOutTime)}</span>
           </div>
         )}
       </div>
 
-      {/* Location Info */}
+      {/* Location Footer */}
       {(attendance.checkInLocation || attendance.checkOutLocation) && (
-        <div className="mt-3 pt-3 border-t border-gray-200">
-          <div className="flex items-center text-xs text-gray-500">
-            <MapPin className="h-4 w-4 mr-1" />
-            Location tracked
+        <div className="pt-4 border-t border-gray-50 flex items-center justify-between">
+          <div className="flex items-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+            <MapPin className="h-3.5 w-3.5 mr-1.5 text-teal-500" />
+            Geofence Verified
           </div>
+          <button className="text-[10px] font-black text-teal-600 uppercase hover:underline">View Map</button>
         </div>
       )}
     </div>
@@ -123,7 +126,7 @@ export default function AttendancePage() {
       if (selectedStatus) {
         filters.status = selectedStatus as Attendance['status'];
       }
-
+      
       const [attendanceData, studentsData] = await Promise.all([
         attendanceService.getAttendanceRecords(filters),
         studentService.getStudents()
@@ -193,7 +196,7 @@ export default function AttendancePage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center min-h-100">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
         <span className="ml-3 text-gray-600">Loading attendance data...</span>
       </div>

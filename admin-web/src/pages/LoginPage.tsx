@@ -7,10 +7,6 @@ import { Eye, EyeOff, LogIn, AlertCircle, GraduationCap } from 'lucide-react';
 import { useAuthStore } from '../stores/auth';
 import type { LoginCredentials } from '../types';
 
-const isDev = import.meta.env.DEV;
-
-// Only import debug tools in development
-
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
@@ -20,7 +16,6 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isDemoMode] = useState(false);
   const { signIn, error, isLoading, clearError } = useAuthStore();
   const navigate = useNavigate();
 
@@ -71,16 +66,6 @@ export default function LoginPage() {
 
         {/* Login Form */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 p-8">
-          {/* Demo/Debug Tools - Only in development */}
-          {isDev && (
-            <>
-              <div className="mb-6 space-y-3">
-                <div className="flex gap-2">
-                </div>
-              </div>
-            </>
-          )}
-
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             {/* Email Field */}
             <div>
@@ -151,22 +136,6 @@ export default function LoginPage() {
                         <p>Create an admin user in Firestore with role: 'admin'</p>
                       </div>
                     )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {isDev && isDemoMode && (
-              <div className="bg-blue-50 border-l-4 border-blue-400 rounded-lg p-4">
-                <div className="flex">
-                  <AlertCircle className="h-5 w-5 text-blue-400 mr-3 mt-0.5" />
-                  <div>
-                    <h3 className="text-sm font-semibold text-blue-800">
-                      Demo Mode
-                    </h3>
-                    <p className="text-sm text-blue-700 mt-1">
-                      Using demo credentials. Make sure to create this user in Firebase Auth.
-                    </p>
                   </div>
                 </div>
               </div>
