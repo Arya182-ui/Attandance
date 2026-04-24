@@ -1,308 +1,131 @@
-# Project Structure
+# Architecture
 
 ## Overview
 
-This project consists of two Flutter applications:
-1. **Student App** - Mobile application for students
-2. **Admin Panel** - Web application for administrators
+The repository is a two-client Firebase application:
 
-Both follow Clean Architecture principles with clear separation of concerns.
+- `student_app`: Flutter client used by students.
+- `admin-web`: React client used by admins.
 
-## Directory Structure
+Both clients share the same Firebase project and data model.
 
+## High-Level System
+
+```text
+Student App (Flutter)        Admin Panel (React)
+          \                      /
+           \                    /
+            \                  /
+             Firebase Authentication
+                     |
+                Cloud Firestore
+                     |
+               Firebase Storage
 ```
+
+## Repository Layout
+
+```text
 Attandance/
-├── student_app/              # Student mobile application
-│   └── lib/
-│       ├── core/             # Core utilities and constants
-│       │   ├── constants/    # App constants
-│       │   ├── theme/        # Theme configuration
-│       │   └── utils/        # Helper utilities
-│       ├── data/             # Data layer
-│       │   ├── datasources/  # Firebase data sources
-│       │   │   ├── auth_datasource.dart
-│       │   │   ├── attendance_datasource.dart
-│       │   │   └── institute_datasource.dart
-│       │   ├── models/       # Data models
-│       │   │   ├── user_model.dart
-│       │   │   ├── attendance_model.dart
-│       │   │   └── institute_model.dart
-│       │   └── repositories/ # Repository implementations
-│       │       ├── auth_repository_impl.dart
-│       │       ├── attendance_repository_impl.dart
-│       │       └── institute_repository_impl.dart
-│       ├── domain/           # Business logic layer
-│       │   ├── entities/     # Domain entities
-│       │   │   ├── user_entity.dart
-│       │   │   ├── attendance_entity.dart
-│       │   │   └── institute_entity.dart
-│       │   ├── repositories/ # Repository interfaces
-│       │   │   ├── auth_repository.dart
-│       │   │   ├── attendance_repository.dart
-│       │   │   └── institute_repository.dart
-│       │   └── usecases/     # Business use cases
-│       │       ├── sign_in_usecase.dart
-│       │       ├── check_in_usecase.dart
-│       │       └── check_out_usecase.dart
-│       ├── presentation/     # UI layer
-│       │   ├── providers/    # Riverpod state providers
-│       │   │   ├── providers.dart
-│       │   │   ├── auth_provider.dart
-│       │   │   └── attendance_provider.dart
-│       │   ├── screens/      # UI screens
-│       │   │   ├── login_screen.dart
-│       │   │   ├── home_screen.dart
-│       │   │   └── attendance_history_screen.dart
-│       │   └── widgets/      # Reusable widgets
-│       │       └── loading_indicator.dart
-│       └── main.dart          # App entry point
-│
-├── admin_panel/              # Admin web application
-│   └── lib/
-│       ├── core/             # Core utilities
-│       ├── data/             # Data layer
-│       │   ├── datasources/
-│       │   │   ├── admin_auth_datasource.dart
-│       │   │   ├── student_datasource.dart
-│       │   │   ├── admin_attendance_datasource.dart
-│       │   │   └── admin_institute_datasource.dart
-│       │   ├── models/
-│       │   │   ├── user_model.dart
-│       │   │   ├── attendance_model.dart
-│       │   │   └── institute_model.dart
-│       │   └── repositories/
-│       │       ├── admin_auth_repository_impl.dart
-│       │       ├── student_repository_impl.dart
-│       │       ├── admin_attendance_repository_impl.dart
-│       │       └── admin_institute_repository_impl.dart
-│       ├── domain/           # Business logic
-│       │   ├── entities/
-│       │   │   ├── user_entity.dart
-│       │   │   ├── attendance_entity.dart
-│       │   │   └── institute_entity.dart
-│       │   └── repositories/
-│       │       ├── admin_auth_repository.dart
-│       │       ├── student_repository.dart
-│       │       ├── admin_attendance_repository.dart
-│       │       └── admin_institute_repository.dart
-│       ├── presentation/     # UI layer
-│       │   ├── providers/
-│       │   │   ├── providers.dart
-│       │   │   ├── admin_auth_provider.dart
-│       │   │   ├── student_provider.dart
-│       │   │   ├── admin_attendance_provider.dart
-│       │   │   └── institute_provider.dart
-│       │   ├── screens/
-│       │   │   ├── admin_login_screen.dart
-│       │   │   ├── dashboard_screen.dart
-│       │   │   ├── students_screen.dart
-│       │   │   ├── attendance_screen.dart
-│       │   │   └── institute_settings_screen.dart
-│       │   └── widgets/
-│       └── main.dart
-│
-├── firestore.rules           # Firestore security rules
-├── storage.rules             # Storage security rules
-├── FIREBASE_SETUP.md         # Firebase setup guide
-├── ARCHITECTURE.md           # Architecture documentation
-└── README.md                 # Main documentation
+  admin-web/
+    src/
+      components/
+      pages/
+      services/
+      stores/
+      types/
+      utils/
+  student_app/
+    lib/
+      data/
+      domain/
+      presentation/
+      main.dart
+  firestore.rules
+  firebase.json
 ```
 
-## Layer Responsibilities
+## Student App Architecture (Flutter)
 
-### Domain Layer (Business Logic)
-- **Entities**: Pure Dart classes representing business objects
-- **Repositories**: Abstract interfaces defining data operations
-- **Use Cases**: Specific business logic operations
+The mobile app follows a layered structure:
 
-**Example**: `CheckInUseCase`
-- Validates student hasn't already checked in
-- Gets institute settings
-- Validates location is within radius
-- Performs check-in operation
+- `domain`: core entities and use cases
+- `data`: Firebase-backed repository implementations
+- `presentation`: screens/widgets/state for UI
 
-### Data Layer
-- **Data Sources**: Direct Firebase interaction
-- **Models**: Data transfer objects with serialization
-- **Repository Implementations**: Concrete implementations of domain repositories
+Flow:
 
-**Example**: `AttendanceDataSource`
-- Handles all Firestore operations for attendance
-- Converts between Firestore documents and models
-
-### Presentation Layer
-- **Providers**: Riverpod state management
-- **Screens**: Full-page UI components
-- **Widgets**: Reusable UI components
-
-**Example**: `HomeScreen`
-- Displays user info and today's attendance status
-- Provides check-in/check-out buttons
-- Shows loading and error states
-
-## Key Design Patterns
-
-### Repository Pattern
-Abstracts data sources from business logic:
-```dart
-// Interface (domain)
-abstract class AttendanceRepository {
-  Future<void> checkIn(...);
-}
-
-// Implementation (data)
-class AttendanceRepositoryImpl implements AttendanceRepository {
-  final AttendanceDataSource _dataSource;
-  Future<void> checkIn(...) => _dataSource.checkIn(...);
-}
+```text
+UI (presentation)
+  -> use case/domain logic
+  -> repository/data layer
+  -> Firebase SDK
 ```
 
-### Dependency Injection
-Using Riverpod for clean DI:
-```dart
-final attendanceRepositoryProvider = Provider<AttendanceRepository>((ref) {
-  return AttendanceRepositoryImpl(ref.watch(attendanceDataSourceProvider));
-});
+Key responsibilities:
+- Geo-fenced check-in validation
+- Check-out updates
+- Attendance history display
+- Student authentication and profile actions
+
+## Admin Web Architecture (React)
+
+The web panel is feature-oriented:
+
+- `pages`: route-level UI screens
+- `components`: shared UI blocks
+- `services`: Firebase/Auth/Firestore operations
+- `stores`: global state (auth/session)
+- `types`: shared TypeScript models
+- `utils`: pure helper utilities
+
+Flow:
+
+```text
+Route/Page
+  -> service call
+  -> Firebase JS SDK
+  -> Firestore/Auth
 ```
 
-### Use Case Pattern
-Encapsulates business logic:
-```dart
-class CheckInUseCase {
-  final AttendanceRepository _repository;
-  final InstituteRepository _instituteRepository;
-  
-  Future<void> call(String studentId) async {
-    // Business logic here
-  }
-}
-```
+## Data Model (Firestore)
 
-## Data Flow
+Main collections:
 
-### Student Check-In Flow
-```
-User Action (UI)
-    ↓
-Provider (Presentation)
-    ↓
-Use Case (Domain)
-    ↓
-Repository (Domain Interface)
-    ↓
-Repository Implementation (Data)
-    ↓
-Data Source (Data)
-    ↓
-Firebase/Firestore
-```
+- `users`
+  - user profile and role (`student` or `admin`)
+- `institute`
+  - institute geo-fence settings (`latitude`, `longitude`, `radius`)
+- `attendance`
+  - daily check-in/check-out records per student
 
-### Admin Student Management Flow
-```
-User Action (UI)
-    ↓
-Provider (Presentation)
-    ↓
-Repository (Domain Interface)
-    ↓
-Repository Implementation (Data)
-    ↓
-Data Source (Data)
-    ↓
-Firebase/Firestore + Auth
-```
+Attendance records generally include:
+- student id
+- date/day key
+- check-in time/location
+- check-out time/location
+- status
 
-## State Management
+## Security Model
 
-### Riverpod Providers
+Security is enforced primarily in `firestore.rules`:
 
-#### Stream Providers
-For real-time data:
-```dart
-final authStateProvider = StreamProvider<UserEntity?>((ref) {
-  return ref.watch(authRepositoryProvider).authStateChanges;
-});
-```
+- authenticated users only
+- students can read/update only their allowed data
+- admins have broader read/write access
+- role checks are based on `users/{uid}.role`
 
-#### Future Providers
-For one-time async data:
-```dart
-final attendanceHistoryProvider = FutureProvider.family<List<AttendanceEntity>, String>((ref, studentId) {
-  return ref.watch(attendanceRepositoryProvider).getAttendanceHistory(studentId);
-});
-```
+## Operational Notes
 
-#### StateNotifier Providers
-For mutable state:
-```dart
-class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
-  Future<void> signIn(String email, String password) async { ... }
-}
-```
+- Keep schema, rules, and docs in sync when changing Firestore fields.
+- Prefer shared naming conventions across both clients.
+- Validate business-critical constraints in both client logic and rules.
 
-## Code Organization Best Practices
+## When Updating Architecture
 
-1. **One class per file** - Each entity, model, or use case in its own file
-2. **Clear naming conventions** - Descriptive names indicating purpose
-3. **Separation of concerns** - Each layer handles specific responsibilities
-4. **Dependency direction** - Always flows inward (UI → Domain ← Data)
-5. **Interface segregation** - Small, focused repository interfaces
+Update this file when you change:
 
-## Testing Strategy
-
-### Unit Tests
-- Test use cases in isolation
-- Test repository implementations
-- Test data models serialization
-
-### Widget Tests
-- Test individual screens
-- Test widget interactions
-- Test error states
-
-### Integration Tests
-- Test complete user flows
-- Test Firebase integration
-- Test location services
-
-## Adding New Features
-
-When adding a new feature:
-
-1. **Start with Domain**
-   - Create entity if needed
-   - Add methods to repository interface
-   - Create use case
-
-2. **Implement Data Layer**
-   - Update data source
-   - Update model if needed
-   - Implement repository method
-
-3. **Update Presentation**
-   - Create/update provider
-   - Update UI screens
-   - Handle loading/error states
-
-Example: Adding "Late Check-In" feature
-1. Domain: Add `isLate` to AttendanceEntity
-2. Domain: Update CheckInUseCase to check time
-3. Data: Update AttendanceModel serialization
-4. Data: Update AttendanceDataSource
-5. Presentation: Update UI to show late indicator
-
-## Performance Considerations
-
-- Use `.limit()` on Firestore queries
-- Implement pagination for large lists
-- Cache institute settings locally
-- Optimize image uploads (if using selfies)
-- Use indexed queries in Firestore
-
-## Security Considerations
-
-- Never expose Firebase API keys in code
-- Use Firestore security rules
-- Validate all inputs
-- Encrypt sensitive data
-- Implement proper error handling
+- folder layout or app boundaries
+- Firestore collections/field contracts
+- security or role model
+- cross-app data flow assumptions
