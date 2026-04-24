@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'firebase_options.dart';
 import 'presentation/providers/auth_provider.dart';
@@ -130,6 +132,19 @@ class _FirebaseInitializerState extends State<FirebaseInitializer>
           throw Exception('Connection timeout. Please check your internet and try again.');
         },
       );
+
+      // Initialize App Check with debug token for development
+      if (!kDebugMode) {
+        try {
+          await FirebaseAppCheck.instance.activate(
+            androidProvider: AndroidProvider.playIntegrity,
+            appleProvider: AppleProvider.deviceCheck,
+          );
+        } catch (e) {
+          print('App Check initialization warning: $e');
+          // Continue even if App Check fails - it's optional for dev
+        }
+      }
 
       // Wait a bit for splash to show
       await Future.delayed(const Duration(milliseconds: 1500));

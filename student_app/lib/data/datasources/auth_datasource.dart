@@ -10,10 +10,14 @@ class AuthDataSource {
 
   Future<UserModel?> signIn(String email, String password) async {
     try {
+      print('🔐 Attempting sign in for: $email');
+      
       final credential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      print('✅ Authentication successful for: ${credential.user?.email}');
 
       if (credential.user == null) {
         throw Exception('Login failed. Please try again.');
@@ -116,6 +120,7 @@ class AuthDataSource {
             'Please check your internet connection and try again.'
           );
         default:
+          print('🔴 Firebase Auth Error: ${e.code} - ${e.message}');
           throw Exception(
             '⚠️ Login Failed\n\n'
             '${e.message ?? "An unknown error occurred"}\n\n'
@@ -123,6 +128,7 @@ class AuthDataSource {
           );
       }
     } catch (e) {
+      print('🔴 Unexpected error during login: $e');
       if (e is Exception) rethrow;
       throw Exception(
         '⚠️ Login Error\n\n'
