@@ -1,331 +1,141 @@
 # Geo-Fenced Attendance System
 
-A complete production-ready attendance management system built with **Flutter** and **Firebase** that uses geolocation to ensure students can only check-in when they are within a specified radius of the institute.
+Geo-fenced attendance platform with:
+- `student_app`: Flutter app used by students for check-in/check-out.
+- `admin-web`: React + TypeScript web panel for admins.
+- Firebase backend: Authentication, Firestore, Storage, and security rules.
 
-## 🎯 Features
+## What It Does
 
-### Student Mobile App
-- ✅ Email/Password Authentication
-- ✅ Role-based access (Students only)
-- ✅ Geo-fenced Check-in/Check-out
-- ✅ Real-time location validation
-- ✅ Attendance history viewing
-- ✅ Prevents multiple check-ins per day
-- ✅ Clean and intuitive UI
+- Role-based access for students and admins
+- Geo-fenced attendance check-in using device location
+- Check-out and attendance history tracking
+- Admin student management (create, update, delete)
+- Institute location/radius configuration
+- Attendance filtering and CSV export
 
-### Admin Web Panel
-- ✅ Admin authentication
-- ✅ Student management (CRUD operations)
-- ✅ Institute location settings
-- ✅ Radius configuration
-- ✅ Attendance viewing with filters
-- ✅ CSV export functionality
-- ✅ Responsive web design
+## Repository Structure
 
-## 🏗️ Architecture
-
-This project follows **Clean Architecture** principles:
-
-```
-├── domain/           # Business logic layer
-│   ├── entities/     # Core business objects
-│   ├── repositories/ # Abstract repository interfaces
-│   └── usecases/     # Business logic use cases
-├── data/             # Data layer
-│   ├── datasources/  # Firebase data sources
-│   ├── models/       # Data models with serialization
-│   └── repositories/ # Repository implementations
-└── presentation/     # UI layer
-    ├── providers/    # Riverpod state management
-    ├── screens/      # UI screens
-    └── widgets/      # Reusable widgets
+```text
+Attandance/
+  admin-web/            # React + TypeScript admin panel (Vite)
+  student_app/          # Flutter student app
+  firestore.rules       # Firestore security rules
+  firebase.json         # Firebase deploy config
 ```
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Frontend:** Flutter 3.x
-- **State Management:** Riverpod
-- **Backend:** Firebase
-  - Firebase Authentication
-  - Cloud Firestore
-  - Firebase Storage
-- **Geolocation:** Geolocator package
-- **CSV Export:** csv package
+- Student app: Flutter, Riverpod, Firebase SDKs, Geolocator
+- Admin panel: React 18, TypeScript, Vite, Zustand, React Query, Firebase JS SDK
+- Backend: Firebase Authentication, Cloud Firestore, Firebase Storage
 
-## 📋 Prerequisites
+## Prerequisites
 
-Before you begin, ensure you have:
-
-- [Flutter SDK](https://flutter.dev/docs/get-started/install) (3.0 or higher)
-- [Firebase CLI](https://firebase.google.com/docs/cli)
-- [FlutterFire CLI](https://firebase.flutter.dev/docs/cli/)
+- Flutter SDK (3.x)
+- Node.js (16+)
+- Firebase CLI
+- FlutterFire CLI (for Flutter app configuration)
 - A Firebase project
-- Android Studio / VS Code with Flutter extensions
 
-## 🚀 Setup Instructions
+## Quick Start
 
-### 1. Clone the Repository
+1. Clone and open the repository:
 
 ```bash
 git clone https://github.com/Arya182-ui/Attandance.git
 cd Attandance
 ```
 
-### 2. Firebase Setup
-
-#### Create a Firebase Project
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Create a new project
-3. Enable Authentication (Email/Password)
-4. Enable Cloud Firestore
-5. Enable Firebase Storage
-
-#### Configure Firebase for Flutter
+2. Configure Firebase for `student_app`:
 
 ```bash
-# Install FlutterFire CLI
-dart pub global activate flutterfire_cli
-
-# Configure Firebase for Student App
 cd student_app
-flutterfire configure
-
-# Configure Firebase for Admin Panel
-cd ../admin_panel
-flutterfire configure
+flutterfire configure --project=YOUR_FIREBASE_PROJECT_ID
 ```
 
-This will generate `firebase_options.dart` files in both projects.
-
-### 3. Deploy Firestore Security Rules
+3. Install dependencies:
 
 ```bash
-# From the root directory
+# Student app
+cd student_app
+flutter pub get
+
+# Admin panel
+cd ../admin-web
+npm install
+```
+
+4. Deploy security rules from repository root:
+
+```bash
 firebase deploy --only firestore:rules
-firebase deploy --only storage
 ```
 
-### 4. Install Dependencies
+5. Create first admin user:
+- Create user in Firebase Authentication.
+- In Firestore `users` collection, create document with Auth UID as document id:
 
-#### Student App
-```bash
-cd student_app
-flutter pub get
+```json
+{
+  "email": "admin@example.com",
+  "name": "Admin Name",
+  "role": "admin"
+}
 ```
 
-#### Admin Panel
-```bash
-cd ../admin_panel
-flutter pub get
-```
+6. Configure institute settings in admin panel after first login:
+- latitude
+- longitude
+- allowed radius (meters)
 
-### 5. Create Initial Admin User
+## Run Locally
 
-You need to manually create the first admin user in Firebase Console:
-
-1. Go to Firebase Console > Authentication
-2. Add a new user with email and password
-3. Go to Cloud Firestore
-4. Create a document in the `users` collection:
-   ```json
-   {
-     "email": "admin@example.com",
-     "name": "Admin Name",
-     "role": "admin"
-   }
-   ```
-   Use the Auth UID as the document ID.
-
-### 6. Set Institute Settings
-
-After logging in as admin for the first time:
-1. Go to Institute Settings
-2. Set your institute's latitude and longitude
-3. Set the allowed radius (in meters)
-
-You can find coordinates using [Google Maps](https://www.google.com/maps) - right-click on a location and copy the coordinates.
-
-## 📱 Running the Applications
-
-### Student Mobile App
+Student app:
 
 ```bash
 cd student_app
-
-# For Android
 flutter run
-
-# For iOS
-flutter run
-
-# For Web (not recommended for mobile app)
-flutter run -d chrome
 ```
 
-### Admin Web Panel
+Admin panel:
 
 ```bash
-cd admin_panel
-
-# Run on Chrome
-flutter run -d chrome
-
-# Build for production
-flutter build web
+cd admin-web
+npm run dev
 ```
 
-## 🗂️ Firestore Database Structure
+## Build for Production
 
-### Collections
+Student app example:
 
-#### `users`
-```json
-{
-  "id": "auto-generated",
-  "name": "John Doe",
-  "email": "student@example.com",
-  "role": "student" // or "admin"
-}
+```bash
+cd student_app
+flutter build apk --release
 ```
 
-#### `institute`
-```json
-{
-  "settings": {
-    "latitude": 40.7128,
-    "longitude": -74.0060,
-    "radius": 100.0
-  }
-}
+Admin panel:
+
+```bash
+cd admin-web
+npm run build
 ```
 
-#### `attendance`
-```json
-{
-  "id": "studentId_YYYY-MM-DD",
-  "studentId": "userId",
-  "date": "Timestamp",
-  "checkInTime": "Timestamp",
-  "checkOutTime": "Timestamp",
-  "checkInLocation": {
-    "latitude": 40.7128,
-    "longitude": -74.0060
-  },
-  "checkOutLocation": {
-    "latitude": 40.7128,
-    "longitude": -74.0060
-  },
-  "status": "checked_in", // or "checked_out", "absent"
-  "createdAt": "Server Timestamp"
-}
-```
+## Firestore Collections (High Level)
 
-## 🔐 Security Rules
+- `users`: profile + role (`student`/`admin`)
+- `institute`: geo-fence settings (latitude, longitude, radius)
+- `attendance`: per-student daily attendance records
 
-The project includes comprehensive Firestore security rules:
+## Documentation Index
 
-- ✅ Students can only read their own data
-- ✅ Students cannot modify institute settings
-- ✅ Admins have full access
-- ✅ Attendance records are protected by role-based access
-- ✅ Prevents duplicate check-ins on the same day
+- `FIREBASE_SETUP.md`: detailed Firebase setup
+- `ARCHITECTURE.md`: codebase and data flow architecture
+- `FEATURES.md`: complete feature list
+- `CONTRIBUTING.md`: contribution workflow and standards
+- `MOBILE_UX_IMPROVEMENTS.md`: student app UX updates
+- `CHANGELOG.md`: release history
 
-## 📊 Business Logic
+## License
 
-### Check-in Process
-1. Student requests location permission
-2. App gets current GPS coordinates
-3. Fetches institute settings from Firestore
-4. Calculates distance using Haversine formula
-5. If distance ≤ allowed radius → Allow check-in
-6. If distance > allowed radius → Show error
-7. Prevents multiple check-ins on same day
-
-### Check-out Process
-1. Gets current GPS coordinates
-2. Updates existing attendance record
-3. Records check-out time and location
-
-## 🧪 Testing
-
-### Test Student Account
-Create a test student in Firebase:
-1. Authentication: Add user with email/password
-2. Firestore: Add user document with role="student"
-
-### Test Location
-For testing, you can temporarily:
-1. Use device location simulator in Android Studio/Xcode
-2. Or modify the radius to a larger value
-3. Or use actual GPS coordinates of your test location
-
-## 📦 Dependencies
-
-### Student App
-- `flutter_riverpod`: State management
-- `firebase_core`, `firebase_auth`, `cloud_firestore`: Firebase integration
-- `geolocator`: Location services
-- `permission_handler`: Permissions
-- `intl`: Date formatting
-
-### Admin Panel
-- `flutter_riverpod`: State management
-- `firebase_core`, `firebase_auth`, `cloud_firestore`: Firebase integration
-- `csv`: CSV export
-- `universal_html`: Web downloads
-- `intl`: Date formatting
-
-## 🎨 Features in Detail
-
-### Geofencing
-- Uses Haversine formula for accurate distance calculation
-- Validates student location before allowing check-in
-- Configurable radius from admin panel
-
-### State Management
-- Clean Riverpod architecture
-- Separation of concerns
-- Reactive UI updates
-
-### Error Handling
-- Comprehensive error messages
-- Location permission handling
-- Network error handling
-
-## 🚧 Troubleshooting
-
-### Location Permission Issues (Android)
-Add to `AndroidManifest.xml`:
-```xml
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-```
-
-### Location Permission Issues (iOS)
-Add to `Info.plist`:
-```xml
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>This app needs location access to verify attendance</string>
-```
-
-### Firebase Configuration
-If you get Firebase errors, ensure:
-1. `google-services.json` (Android) is in `android/app/`
-2. `GoogleService-Info.plist` (iOS) is in `ios/Runner/`
-3. `firebase_options.dart` is properly generated
-
-## 📝 License
-
-This project is open-source and available under the MIT License.
-
-## 👨‍💻 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📧 Support
-
-For issues and questions, please open an issue in the GitHub repository.
-
----
-
-**Built with ❤️ using Flutter and Firebase**
+MIT License. See `LICENSE`.

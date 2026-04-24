@@ -66,26 +66,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Documentation
 - Comprehensive README with setup instructions
-- QUICKSTART guide for 30-minute setup
 - ARCHITECTURE documentation explaining:
   - Clean architecture layers
   - Design patterns used
   - Data flow diagrams
   - Code organization principles
 - FIREBASE_SETUP guide with step-by-step instructions
-- DEPLOYMENT guide for production release:
-  - Android deployment
-  - iOS deployment
-  - Web deployment options
-  - Environment configuration
-  - Monitoring setup
 - FEATURES documentation listing all capabilities
 - CONTRIBUTING guidelines for developers
 - Security best practices
 - Troubleshooting guides
 
 #### Project Structure
-- Separate Flutter projects for student app and admin panel
+- Separate student mobile app (Flutter) and admin web panel (React)
 - Clean architecture folder structure
 - Domain entities shared between layers
 - Repository pattern implementation

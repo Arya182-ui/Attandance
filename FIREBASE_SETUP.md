@@ -1,185 +1,136 @@
 # Firebase Setup Guide
 
-## Step-by-Step Firebase Configuration
+This guide configures Firebase for both apps in this repository:
+- `student_app` (Flutter)
+- `admin-web` (React + TypeScript)
 
-### 1. Create Firebase Project
+## 1. Create Firebase Project
 
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Click "Add Project"
-3. Enter project name: "Attendance System"
-4. Enable Google Analytics (optional)
-5. Click "Create Project"
+1. Open Firebase Console.
+2. Create a new project.
+3. Enable these products:
+   - Authentication (Email/Password)
+   - Cloud Firestore
+   - Firebase Storage
 
-### 2. Enable Authentication
+## 2. Register Applications
 
-1. In Firebase Console, go to "Authentication"
-2. Click "Get Started"
-3. Enable "Email/Password" sign-in method
-4. Save
+Register the platforms you need:
 
-### 3. Create Firestore Database
+- Flutter app (`student_app`): Android/iOS/Web as needed
+- Web app (`admin-web`): Web
 
-1. Go to "Firestore Database"
-2. Click "Create Database"
-3. Select "Start in production mode"
-4. Choose a location closest to your users
-5. Click "Enable"
+## 3. Configure `student_app`
 
-### 4. Enable Firebase Storage
+Install tooling:
 
-1. Go to "Storage"
-2. Click "Get Started"
-3. Use default security rules for now
-4. Click "Done"
-
-### 5. Configure Flutter Apps
-
-#### Install FlutterFire CLI
 ```bash
 npm install -g firebase-tools
 dart pub global activate flutterfire_cli
-```
-
-#### Login to Firebase
-```bash
 firebase login
 ```
 
-#### Configure Student App
+Generate Flutter Firebase options:
+
 ```bash
 cd student_app
-flutterfire configure --project=your-project-id
+flutterfire configure --project=YOUR_FIREBASE_PROJECT_ID
 ```
 
-Select:
-- ✅ Android
-- ✅ iOS
-- ✅ Web (optional)
+This generates `student_app/lib/firebase_options.dart`.
 
-This creates `lib/firebase_options.dart`
+## 4. Configure `admin-web`
 
-#### Configure Admin Panel
+`admin-web` uses Firebase Web config in code. Update values in:
+
+- `admin-web/src/services/firebase.ts`
+
+Use the Firebase Console web app config values (`apiKey`, `authDomain`, `projectId`, etc.).
+
+## 5. Deploy Firestore Rules
+
+From repository root:
+
 ```bash
-cd ../admin_panel
-flutterfire configure --project=your-project-id
-```
-
-Select:
-- ✅ Web
-- ✅ Android (optional)
-- ✅ iOS (optional)
-
-### 6. Deploy Security Rules
-
-From project root:
-```bash
-firebase init firestore
-firebase init storage
 firebase deploy --only firestore:rules
-firebase deploy --only storage
 ```
 
-### 7. Create Admin User
+## 6. Seed Initial Admin User
 
-#### Via Firebase Console:
-1. Go to Authentication
-2. Add User: email=`admin@yourdomain.com`, password=`yourpassword`
-3. Copy the User UID
-4. Go to Firestore
-5. Create collection: `users`
-6. Add document with the User UID:
-   ```json
-   {
-     "name": "Admin Name",
-     "email": "admin@yourdomain.com",
-     "role": "admin"
-   }
-   ```
+1. Create an auth user in Firebase Authentication.
+2. Copy the user UID.
+3. In Firestore `users` collection, create document with the same UID.
 
-### 8. Initialize Institute Settings
+Example document:
 
-#### Via Firebase Console:
-1. Go to Firestore
-2. Create collection: `institute`
-3. Add document with ID: `settings`
-   ```json
-   {
-     "latitude": 0.0,
-     "longitude": 0.0,
-     "radius": 100.0
-   }
-   ```
+```json
+{
+  "name": "Admin Name",
+  "email": "admin@example.com",
+  "role": "admin"
+}
+```
 
-### 9. Platform-Specific Setup
+## 7. Seed Institute Settings
 
-#### Android (Student App)
+Create `institute/settings` document:
 
-Add to `student_app/android/app/src/main/AndroidManifest.xml`:
+```json
+{
+  "latitude": 0.0,
+  "longitude": 0.0,
+  "radius": 100.0
+}
+```
+
+## 8. Student App Platform Notes
+
+Android permissions (in `AndroidManifest.xml`):
+
 ```xml
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 <uses-permission android:name="android.permission.INTERNET" />
 ```
 
-#### iOS (Student App)
+iOS permissions (in `Info.plist`):
 
-Add to `student_app/ios/Runner/Info.plist`:
 ```xml
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>We need your location to verify attendance at the institute</string>
-<key>NSLocationAlwaysUsageDescription</key>
-<string>We need your location to verify attendance</string>
+<string>Location is required to validate attendance check-in.</string>
 ```
 
-### 10. Test the Setup
+## 9. Verification Checklist
 
-#### Test Student App:
-1. Run the app
-2. Try to login (should fail - no students yet)
-
-#### Test Admin Panel:
-1. Run on web browser
-2. Login with admin credentials
-3. Add a test student
-4. Set institute location in settings
-
-#### Test Complete Flow:
-1. Login to student app with test student
-2. Go to institute location (or adjust radius)
-3. Try check-in
-4. Verify attendance appears in admin panel
+- Admin can sign in to `admin-web`.
+- Admin can add a student.
+- Student can sign in on `student_app`.
+- Student can check in only within configured radius.
+- Attendance appears in admin panel.
 
 ## Troubleshooting
 
-### Firebase Connection Issues
-- Check internet connection
-- Verify `google-services.json` and `GoogleService-Info.plist` are in correct locations
-- Rebuild the app after adding Firebase config files
+### Firestore `permission-denied`
 
-### Location Permission Denied
-- Check OS settings for app permissions
-- Ensure manifest/plist entries are correct
-- Request permissions at runtime
+- Confirm user is authenticated.
+- Confirm `users/{uid}` exists with correct `role`.
+- Confirm latest rules are deployed.
 
-### Firestore Permission Denied
-- Verify security rules are deployed
-- Check user authentication status
-- Ensure user document has correct role field
+### Admin login blocked
 
-### Admin Can't Login
-- Verify user exists in Authentication
-- Check user document exists in Firestore with role="admin"
-- Check email/password are correct
+- Confirm auth user exists.
+- Confirm matching Firestore user document exists.
+- Confirm role is exactly `admin`.
 
-## Production Checklist
+### Student app Firebase init errors
 
-- [ ] Enable App Check for security
-- [ ] Set up proper API key restrictions
-- [ ] Configure Firebase project budget alerts
-- [ ] Set up Cloud Functions for advanced features
-- [ ] Enable Firebase Analytics
-- [ ] Set up Crashlytics
-- [ ] Configure backup for Firestore
-- [ ] Review and tighten security rules
-- [ ] Set up monitoring and alerts
-- [ ] Test thoroughly on production environment
+- Re-run `flutterfire configure`.
+- Confirm `student_app/lib/firebase_options.dart` exists.
+- Rebuild after config updates.
+
+## Production Hardening
+
+- Enable App Check where applicable.
+- Restrict API keys by platform/domain.
+- Configure budget alerts and monitoring.
+- Review and tighten Firestore rules.
