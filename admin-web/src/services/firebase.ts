@@ -6,12 +6,12 @@ import { getStorage } from 'firebase/storage';
 // Firebase configuration - Use environment variables for production
 // Falls back to hardcoded config for development if .env is not set
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyB5tYxpZdUQfvWbNYNb7m7eqxS7tKtLFBQ",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "attendance-tushar.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "attendance-tushar",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "attendance-tushar.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "3016273431",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:3016273431:web:b9623f44e0a2382222b652"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY ,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID ,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Initialize Firebase
