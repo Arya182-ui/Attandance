@@ -129,13 +129,16 @@ npm run build
 
 ## Documentation Index
 
-- `FIREBASE_SETUP.md`: detailed Firebase setup
-- `ARCHITECTURE.md`: codebase and data flow architecture
-- `FEATURES.md`: complete feature list
-- `CONTRIBUTING.md`: contribution workflow and standards
-- `MOBILE_UX_IMPROVEMENTS.md`: student app UX updates
-- `CHANGELOG.md`: release history
+- [FIREBASE_SETUP.md](FIREBASE_SETUP.md): detailed Firebase setup
+- [ARCHITECTURE.md](ARCHITECTURE.md): codebase and data flow architecture
+- [FEATURES.md](FEATURES.md): complete feature list
+- [CONTRIBUTING.md](CONTRIBUTING.md): contribution workflow and standards
+- [MOBILE_UX_IMPROVEMENTS.md](MOBILE_UX_IMPROVEMENTS.md): student app UX updates
+- [CHANGELOG.md](CHANGELOG.md): release history
+- [student_app/README.md](student_app/README.md): student app local setup and run guide
+- [admin-web/README.md](admin-web/README.md): admin panel setup, scripts, and deployment notes
+
 
 ## License
 
-MIT License. See `LICENSE`.
+MIT License. See [LICENSE](LICENSE).
