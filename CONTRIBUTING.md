@@ -1,176 +1,118 @@
-# Changelog
+# Contributing
 
-All notable changes to this project will be documented in this file.
+Thanks for contributing to the Geo-Fenced Attendance System.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+This repository contains two apps:
+- `student_app` (Flutter)
+- `admin-web` (React + TypeScript)
 
-## [1.0.0] - 2024-01-15
+## Code of Conduct
 
-### Added
+- Be respectful and constructive.
+- Keep feedback specific and actionable.
+- Assume good intent.
 
-#### Student Mobile App
-- Email/password authentication with role-based access
-- Geo-fenced check-in system with real-time location validation
-- Check-out functionality with location tracking
-- Attendance history viewing (last 30 records)
-- Prevention of duplicate check-ins on the same day
-- Real-time GPS distance calculation using Haversine formula
-- Comprehensive error handling and user guidance
-- Loading indicators and smooth UI transitions
-- Material Design 3 UI implementation
-- Clean architecture with domain, data, and presentation layers
-- Riverpod state management
-- Firebase Authentication integration
-- Cloud Firestore data persistence
-- Location permission handling
+## Getting Started
 
-#### Admin Web Panel
-- Admin authentication with role verification
-- Dashboard with navigation and overview
-- Complete student management (CRUD operations):
-  - Add students with email/password
-  - Edit student information
-  - Delete students with confirmation
-  - Real-time student list updates
-- Institute settings management:
-  - Configure latitude and longitude
-  - Set allowed check-in radius
-  - Real-time validation of coordinates
-  - Visual feedback for current settings
-- Attendance viewing with advanced features:
-  - Tabular display of all attendance records
-  - Filter by date range
-  - Filter by specific student
-  - Status indicators
-  - Real-time updates
-- CSV export functionality:
-  - Export filtered attendance data
-  - Formatted for Excel compatibility
-  - Auto-generated filenames with timestamps
-- Responsive web design
-- Material Design 3 UI
-- Clean architecture implementation
-- Riverpod state management
+```bash
+git clone https://github.com/YOUR_USERNAME/Attandance.git
+cd Attandance
+git checkout -b feature/short-description
+```
 
-#### Firebase Configuration
-- Comprehensive Firestore security rules:
-  - Role-based access control
-  - Student data isolation
-  - Admin full access
-  - Attendance record protection
-  - Duplicate check-in prevention
-- Firebase Storage security rules
-- Server-side timestamp enforcement
-- Data validation rules
+Install dependencies:
 
-#### Documentation
-- Comprehensive README with setup instructions
-- ARCHITECTURE documentation explaining:
-  - Clean architecture layers
-  - Design patterns used
-  - Data flow diagrams
-  - Code organization principles
-- FIREBASE_SETUP guide with step-by-step instructions
-- FEATURES documentation listing all capabilities
-- CONTRIBUTING guidelines for developers
-- Security best practices
-- Troubleshooting guides
+```bash
+cd student_app
+flutter pub get
 
-#### Project Structure
-- Separate student mobile app (Flutter) and admin web panel (React)
-- Clean architecture folder structure
-- Domain entities shared between layers
-- Repository pattern implementation
-- Use case pattern for business logic
-- Provider pattern for dependency injection
-- Model classes with JSON serialization
+cd ../admin-web
+npm install
+```
 
-### Technical Details
+## Local Validation Checklist
 
-#### Dependencies
-**Student App:**
-- flutter_riverpod: ^2.4.9 (State management)
-- firebase_core: ^2.24.2
-- firebase_auth: ^4.15.3
-- cloud_firestore: ^4.13.6
-- firebase_storage: ^11.5.6
-- geolocator: ^10.1.0 (Location services)
-- permission_handler: ^11.0.1
-- intl: ^0.18.1 (Date formatting)
-- image_picker: ^1.0.4
+Before opening a PR, run relevant checks for touched code.
 
-**Admin Panel:**
-- flutter_riverpod: ^2.4.9
-- firebase_core: ^2.24.2
-- firebase_auth: ^4.15.3
-- cloud_firestore: ^4.13.6
-- csv: ^5.1.1 (Export functionality)
-- universal_html: ^2.2.4 (Web downloads)
-- intl: ^0.18.1
+Student app:
 
-#### Database Schema
-**Collections:**
-- `users`: User profiles with role-based access
-- `institute`: Configuration settings
-- `attendance`: Attendance records with timestamps and locations
+```bash
+cd student_app
+dart format .
+flutter analyze
+flutter test
+```
 
-#### Security
-- Firestore rules enforce role-based access
-- Server-side timestamps prevent manipulation
-- Location data validated on client and server
-- Authentication required for all operations
-- Students isolated to their own data
+Admin web:
 
-### Known Limitations
-- Manual admin user creation required (no self-registration)
-- Single institute support (multi-institute planned for v2.0)
-- Student deletion doesn't remove Firebase Auth user (requires admin SDK)
-- No offline support (planned for future release)
-- Web version of student app not optimized for production use
+```bash
+cd admin-web
+npm run lint
+npm run build
+```
 
-### Breaking Changes
-- None (initial release)
+## Branches and Commits
 
-### Security
-- Implemented comprehensive Firestore security rules
-- Role-based access control
-- Protected sensitive user data
-- Validated all client-side inputs on server
+- Use short, focused branches.
+- Keep commits small and descriptive.
+- Suggested commit prefixes: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`.
 
-### Performance
-- Optimized Firestore queries with limits
-- Efficient location calculations
-- Real-time updates only where needed
-- Pagination ready for future implementation
+Examples:
+- `feat: add attendance status filter`
+- `fix: prevent duplicate check-in submission`
+- `docs: update firebase setup for admin-web`
 
-## [Unreleased]
+## Pull Requests
 
-### Planned Features
-- Biometric authentication
-- Face recognition for check-in
-- QR code scanning
-- Push notifications
-- Leave request system
-- Advanced analytics dashboard
-- Multi-institute support
-- Offline mode with sync
-- Parent portal
-- SMS notifications
-- Dark mode
-- Multi-language support
+Include the following in your PR description:
+- What changed
+- Why it changed
+- Any Firebase schema/rules impact
+- Screenshots or recordings for UI changes
+- Test/validation steps you ran
 
-### Improvements Planned
-- Automated admin user creation
-- Bulk student import
-- Advanced filtering options
-- Custom report builder
-- Performance optimizations
-- Enhanced error tracking
-- Automated backups
+PR quality expectations:
+- Keep scope focused
+- Update docs for behavior/config changes
+- Add or update tests when logic changes
+- Avoid unrelated refactors
 
----
+## Architecture and Code Style
 
-## Version History
+Student app:
+- Follow the existing clean architecture boundaries (`domain`, `data`, `presentation`).
+- Keep business logic out of UI widgets.
 
-- **1.0.0** (2024-01-15): Initial release with core functionality
+Admin web:
+- Keep page-level logic in `src/pages` and API/Firebase logic in `src/services`.
+- Prefer shared types in `src/types` and reusable helpers in `src/utils`.
+
+General:
+- Prefer clear names over clever abstractions.
+- Add comments only where logic is not obvious.
+
+## Firebase and Security Changes
+
+When a PR changes Firebase behavior:
+- Update `firestore.rules` if required.
+- Document collection/schema changes in `ARCHITECTURE.md`.
+- Document setup changes in `FIREBASE_SETUP.md`.
+- Validate role-based access paths manually.
+
+Never commit secrets or credentials.
+
+## Reporting Issues
+
+For bugs, include:
+- Reproduction steps
+- Expected vs actual behavior
+- Device/browser details
+- Relevant logs or screenshots
+
+For security issues:
+- Do not open a public issue with exploit details.
+- Share a private report with maintainers first.
+
+## License
+
+By contributing, you agree your contributions are licensed under MIT.
