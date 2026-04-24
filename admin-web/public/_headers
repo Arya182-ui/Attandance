@@ -1,0 +1,18 @@
+# Headers for proper SPA routing and security
+/*
+  Cache-Control: no-cache
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# Cache static assets
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML files should not be cached  
+/*.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# Service Worker
+/sw.js
+  Cache-Control: no-cache

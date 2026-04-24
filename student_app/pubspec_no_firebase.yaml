@@ -1,0 +1,34 @@
+name: student_app
+description: Geo-Fenced Attendance Student Mobile App
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  flutter_riverpod: ^2.6.1
+  
+  # Location & Geofencing (for future use)
+  geolocator: ^10.1.1
+  permission_handler: ^11.4.0
+  
+  # UI
+  cupertino_icons: ^1.0.2
+  flutter_spinkit: ^5.2.0
+  intl: ^0.18.1
+  
+  # Image (for future use) 
+  image_picker: ^1.0.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true

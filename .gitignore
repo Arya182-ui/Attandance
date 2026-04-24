@@ -85,6 +85,13 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Admin Web (React/Vite)
+admin-web/node_modules/
+admin-web/dist/
+admin-web/.env
+admin-web/.env.local
+admin-web/.env.production
+
 # Keystore
 *.jks
 *.keystore

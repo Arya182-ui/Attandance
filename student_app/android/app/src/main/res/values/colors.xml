@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Splash screen background color - Deep Blue theme -->
+    <color name="splash_background">#1A237E</color>
+    
+    <!-- Primary app colors -->
+    <color name="primary">#3F51B5</color>
+    <color name="primary_dark">#1A237E</color>
+    <color name="accent">#FF4081</color>
+	<color name="ic_launcher_background">#ffffff</color>
+</resources>

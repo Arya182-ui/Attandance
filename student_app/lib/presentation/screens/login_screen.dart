@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/loading_indicator.dart';
 
@@ -15,6 +17,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -33,12 +36,46 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         _emailController.text.trim(),
         _passwordController.text,
       );
+      
+      // Don't show success toast here immediately
+      // Success will be shown when auth state actually changes
+      
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
+        final errorMessage = e.toString().replaceAll('Exception: ', '');
+        
+        // Quick toast notification
+        Fluttertoast.showToast(
+          msg: "Login failed! Check your credentials",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 3,
+          backgroundColor: Colors.red[600],
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+        
+        // Show detailed error as dialog
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.red),
+                SizedBox(width: 8),
+                Text('Login Failed'),
+              ],
+            ),
+            content: Text(
+              errorMessage,
+              style: const TextStyle(fontSize: 14),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
           ),
         );
       }
@@ -51,6 +88,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Listen to auth state changes to show success message
+    ref.listen<AsyncValue<UserEntity?>>(authNotifierProvider, (previous, next) {
+      if (mounted && previous?.isLoading == true) {
+        // Only react if previous state was loading (i.e., we just attempted login)
+        if (next.hasValue && next.value != null) {
+          // Success - user is now logged in
+          Fluttertoast.showToast(
+            msg: "✅ Login successful! Welcome back",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Colors.green[600],
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+        }
+      }
+    });
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -65,11 +121,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const Icon(
                     Icons.school,
                     size: 80,
-                    color: Colors.blue,
+                    color: Color(0xFF0D9488),
                   ),
                   const SizedBox(height: 24),
                   const Text(
-                    'Student Attendance',
+                    'SmartCareerAdvisor',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 28,
@@ -78,7 +134,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Geo-Fenced Check-In System',
+                    'Attendance Management System',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16,
@@ -98,8 +154,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
                       }
-                      if (!value.contains('@')) {
-                        return 'Please enter a valid email';
+                      final emailRegex = RegExp(
+                        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                      );
+                      if (!emailRegex.hasMatch(value)) {
+                        return 'Please enter a valid email address';
                       }
                       return null;
                     },
@@ -107,11 +166,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
                       labelText: 'Password',
-                      prefixIcon: Icon(Icons.lock),
-                      border: OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.lock),
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
